@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#312e81">
+<title>Mesa de Informes — Revisión Cámara</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ind:#4f46e5;--ind2:#312e81;--ind-lt:#eef2ff;
+  --grn:#22c55e;--grn-lt:#f0fdf4;--grn-bd:#bbf7d0;
+  --red:#ef4444;--red-lt:#fef2f2;--red-bd:#fecaca;
+  --amb:#f59e0b;--amb-lt:#fffbeb;--amb-bd:#fde68a;
+  --blu:#3b82f6;--blu-lt:#eff6ff;
+  --pur:#9333ea;--pur-lt:#faf5ff;
+  --gray1:#f8fafc;--gray2:#f1f5f9;--gray3:#e2e8f0;--gray4:#94a3b8;--gray5:#64748b;--gray6:#334155;--gray7:#1e293b;
+  --radius:16px;--radius-sm:10px;--shadow:0 2px 12px rgba(0,0,0,.1);
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gray2);color:var(--gray7)}
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#header{background:var(--ind2);color:#fff;padding:14px 16px 12px;flex-shrink:0}
+#header h1{font-size:17px;font-weight:800;letter-spacing:-.3px}
+#header .sub{font-size:11px;color:#a5b4fc;margin-top:2px}
+.dot-bar{background:rgba(0,0,0,.25);border-radius:12px;padding:10px;margin-top:10px}
+.dot-bar-lbl{font-size:10px;color:#a5b4fc;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.dot-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dot-btn{border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border-radius:10px;padding:8px 4px;font-size:10px;font-weight:800;text-align:center;cursor:pointer;transition:.15s all;line-height:1.3}
+.dot-btn .icon{font-size:16px;display:block;margin-bottom:2px}
+.dot-btn.active{border-color:#fff;color:#fff;transform:scale(1.05)}
+.dot-btn.d0.active{background:#ef4444}
+.dot-btn.d1.active{background:#f59e0b}
+.dot-btn.d2.active{background:#3b82f6}
+.dot-btn.d3.active{background:#22c55e}
+/* Tab bar */
+#tabs{display:flex;background:#fff;border-bottom:1px solid var(--gray3);flex-shrink:0}
+.tab-btn{flex:1;padding:12px 4px;font-size:12px;font-weight:700;color:var(--gray5);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;transition:.15s}
+.tab-btn.active{color:var(--ind);border-bottom-color:var(--ind)}
+.badge{background:var(--red);color:#fff;font-size:10px;border-radius:20px;padding:1px 5px;margin-left:4px}
+/* Scroll content */
+#content{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+/* Cards */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.card-body{padding:16px}
+/* Buttons */
+.btn{border:none;border-radius:var(--radius);font-weight:800;cursor:pointer;transition:.12s all;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{transform:scale(.96);opacity:.9}
+.btn-sm{font-size:12px;padding:10px 14px;border-radius:var(--radius-sm)}
+.btn-save{background:var(--ind);color:#fff;font-size:16px;padding:16px;width:100%;border-radius:var(--radius);margin-top:4px;border:none;cursor:pointer;font-weight:800;transition:.12s}
+.btn-save:active{background:#4338ca}
+.btn-save:disabled{background:var(--gray3);color:var(--gray4);cursor:default}
+/* Form */
+.field{margin-bottom:18px}
+.field-label{font-size:11px;font-weight:700;color:var(--gray5);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;display:block}
+.req{color:var(--red)}
+.choice-grid{display:flex;flex-wrap:wrap;gap:6px}
+.choice-grid.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.choice-btn{border:2px solid var(--gray3);background:#fff;color:var(--gray6);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.12s;text-align:center;line-height:1.3}
+.choice-btn.sel{border-color:var(--ind);background:var(--ind);color:#fff}
+.choice-btn.sel-grn{border-color:var(--grn);background:var(--grn);color:#fff}
+.choice-btn.sel-red{border-color:var(--red);background:var(--red);color:#fff}
+.choice-btn.sel-amb{border-color:var(--amb);background:var(--amb);color:#fff}
+.choice-btn .ch-icon{font-size:20px;display:block;margin-bottom:4px}
+.sex-btn{border:2px solid var(--gray3);background:#fff;color:var(--gray6);border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:.12s}
+.sex-btn .icon{font-size:22px;display:block;margin-bottom:4px}
+.sex-btn.sel-m{border-color:var(--blu);background:var(--blu);color:#fff}
+.sex-btn.sel-f{border-color:#ec4899;background:#ec4899;color:#fff}
+.sex-btn.sel-o{border-color:var(--pur);background:var(--pur);color:#fff}
+textarea.obs{width:100%;border:2px solid var(--gray3);border-radius:10px;padding:10px;font-size:13px;font-family:inherit;resize:none;outline:none;color:var(--gray7)}
+textarea.obs:focus{border-color:var(--ind)}
+/* Time input group */
+.time-group{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.time-slot{display:flex;flex-direction:column;gap:4px}
+.time-lbl{font-size:10px;font-weight:700;color:var(--gray5);white-space:nowrap}
+.time-inp{border:2px solid var(--gray3);border-radius:10px;padding:10px 8px;font-size:15px;font-weight:700;font-family:'Courier New',monospace;color:var(--gray7);outline:none;width:100%;text-align:center;-webkit-appearance:none}
+.time-inp:focus{border-color:var(--ind);background:var(--ind-lt)}
+.time-inp.filled{border-color:#a5b4fc;background:var(--ind-lt)}
+/* Date input */
+.date-inp{border:2px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;color:#fff;background:rgba(255,255,255,.1);outline:none;width:100%;-webkit-appearance:none;cursor:pointer}
+.date-inp:focus{border-color:#fff;background:rgba(255,255,255,.2)}
+/* Empty state */
+.empty{text-align:center;padding:48px 20px;color:var(--gray4)}
+.empty .icon{font-size:52px;display:block;margin-bottom:12px}
+.empty p{font-size:14px;font-weight:500}
+.empty small{font-size:12px;display:block;margin-top:6px}
+/* Panel stats */
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi{border-radius:var(--radius-sm);padding:12px 10px;text-align:center}
+.kpi-val{font-size:26px;font-weight:900;line-height:1}
+.kpi-lbl{font-size:10px;font-weight:600;margin-top:3px;line-height:1.3}
+.kpi-ind{background:var(--ind-lt);color:var(--ind)}
+.kpi-grn{background:var(--grn-lt);color:#15803d}
+.kpi-red{background:var(--red-lt);color:#b91c1c}
+.kpi-pur{background:var(--pur-lt);color:#7e22ce}
+.kpi-blu{background:var(--blu-lt);color:#1d4ed8}
+.kpi-amb{background:var(--amb-lt);color:#92400e}
+.chart-title{font-size:13px;font-weight:700;color:var(--gray7);margin-bottom:4px}
+.chart-sub{font-size:11px;color:var(--gray5);margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-name{font-size:11px;color:var(--gray6);width:72px;flex-shrink:0;text-align:right}
+.bar-name.wide{width:100px}
+.bar-track{flex:1;background:var(--gray2);border-radius:20px;height:22px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;transition:.4s width;display:flex;align-items:center;padding-left:8px;min-width:4px}
+.bar-fill span{font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
+.bar-val{font-size:11px;font-weight:700;color:var(--gray7);width:36px;flex-shrink:0;text-align:left}
+/* Historial table */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:480px}
+th{background:var(--gray2);padding:8px 10px;text-align:left;font-weight:700;color:var(--gray5);white-space:nowrap}
+td{padding:8px 10px;border-top:1px solid var(--gray3);color:var(--gray7)}
+.res-att{background:var(--grn-lt);color:#15803d;padding:2px 8px;border-radius:8px;font-weight:700;font-size:10px}
+.res-ret{background:var(--red-lt);color:#b91c1c;padding:2px 8px;border-radius:8px;font-weight:700;font-size:10px}
+.res-der{background:var(--amb-lt);color:#92400e;padding:2px 8px;border-radius:8px;font-weight:700;font-size:10px}
+.export-btn{width:100%;padding:13px;background:var(--ind-lt);border:2px solid #c7d2fe;color:var(--ind);font-weight:700;font-size:13px;border-radius:var(--radius);cursor:pointer;margin-bottom:12px}
+/* Alert */
+.alert{border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.alert-red{background:var(--red-lt);border:1px solid var(--red-bd)}
+.alert-amb{background:var(--amb-lt);border:1px solid var(--amb-bd)}
+.alert .icon{font-size:20px;line-height:1;flex-shrink:0}
+.alert strong{display:block;margin-bottom:2px}
+/* Counter top-right */
+.total-badge{text-align:right}
+.total-badge .num{font-size:22px;font-weight:900;line-height:1}
+.total-badge .lbl{font-size:10px;color:#a5b4fc}
+/* Toast */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;z-index:200;display:none;white-space:nowrap}
+#toast.show{display:block;animation:fadeInOut 1.8s forwards}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(10px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1}100%{opacity:0}}
+/* Sync bar */
+#sync-bar{font-size:11px;padding:5px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:.3s background}
+#sync-bar.ok{background:#dcfce7;color:#15803d}
+#sync-bar.err{background:#fef2f2;color:#b91c1c}
+#sync-bar.pending{background:#fffbeb;color:#92400e}
+#sync-bar.off{background:#f1f5f9;color:#64748b}
+#sync-bar .sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+#sync-bar.ok .sync-dot{background:#22c55e}
+#sync-bar.err .sync-dot{background:#ef4444}
+#sync-bar.pending .sync-dot{background:#f59e0b;animation:pulse 1s infinite}
+#sync-bar.off .sync-dot{background:#94a3b8}
+#sync-bar .sync-btn-mini{background:none;border:1px solid currentColor;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;cursor:pointer;color:inherit}
+/* Settings modal */
+#cfg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;display:none;align-items:flex-end;justify-content:center}
+#cfg-overlay.open{display:flex}
+#cfg-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:600px;padding:24px 20px 40px;max-height:85vh;overflow-y:auto}
+#cfg-modal h2{font-size:17px;font-weight:800;margin-bottom:4px}
+#cfg-modal .cfg-sub{font-size:12px;color:var(--gray5);margin-bottom:20px;line-height:1.5}
+.cfg-label{font-size:11px;font-weight:700;color:var(--gray5);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;display:block}
+.cfg-input{width:100%;border:2px solid var(--gray3);border-radius:10px;padding:11px 12px;font-size:12px;font-family:monospace;color:var(--gray7);outline:none;word-break:break-all}
+.cfg-input:focus{border-color:var(--ind)}
+.cfg-steps{background:var(--ind-lt);border-radius:10px;padding:14px;margin:16px 0;font-size:12px;line-height:2;color:var(--gray7)}
+.cfg-steps b{color:var(--ind)}
+.cfg-row{display:flex;gap:8px;margin-top:14px}
+.cfg-btn{flex:1;padding:13px;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer}
+.cfg-save{background:var(--ind);color:#fff}
+.cfg-test{background:var(--gray2);color:var(--gray6)}
+.cfg-clear{background:var(--red-lt);color:var(--red);border:2px solid var(--red-bd)}
+#cfg-result{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:600;display:none}
+#cfg-result.ok{background:var(--grn-lt);color:#15803d}
+#cfg-result.err{background:var(--red-lt);color:#b91c1c}
+.gear-btn{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* Preview tiempos calculados */
+.tiempo-preview{display:flex;gap:12px;justify-content:center;padding:10px;background:var(--gray2);border-radius:10px;margin-top:8px}
+.tprev-item{text-align:center}
+.tprev-val{font-size:20px;font-weight:900;line-height:1}
+.tprev-lbl{font-size:10px;color:var(--gray5);margin-top:2px}
+/* Últimos registros rápidos */
+.quick-rec{display:flex;align-items:center;gap:8px;padding:7px 0}
+.quick-rec + .quick-rec{border-top:1px solid var(--gray3)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div>
+        <h1>📹 Mesa de Informes</h1>
+        <div class="sub" id="fecha-lbl">Revisión de cámara</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="total-badge">
+          <div class="num" id="total-badge">0</div>
+          <div class="lbl">registros</div>
+        </div>
+        <button class="gear-btn" onclick="abrirConfig()" title="Configurar Drive">⚙️</button>
+      </div>
+    </div>
+
+    <!-- Fecha de la grabación -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:#a5b4fc;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">
+        📅 Fecha de la grabación
+      </div>
+      <input type="date" id="fecha-grabacion" class="date-inp"
+        oninput="state.fechaRevision=this.value; updateFechaLbl()">
+    </div>
+
+    <div class="dot-bar">
+      <div class="dot-bar-lbl">Dotación visible en cámara</div>
+      <div class="dot-btns">
+        <button class="dot-btn d0" data-d="0" onclick="cambiarDot(0)">
+          <span class="icon">🔴</span>Sin personal
+        </button>
+        <button class="dot-btn d1 active" data-d="1" onclick="cambiarDot(1)">
+          <span class="icon">🟡</span>1 personal
+        </button>
+        <button class="dot-btn d2" data-d="2" onclick="cambiarDot(2)">
+          <span class="icon">🔵</span>2 personales
+        </button>
+        <button class="dot-btn d3" data-d="3" onclick="cambiarDot(3)">
+          <span class="icon">🟢</span>3 personales
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SYNC STATUS BAR -->
+  <div id="sync-bar" class="off">
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="sync-dot"></span>
+      <span id="sync-lbl">Drive no configurado</span>
+    </div>
+    <button class="sync-btn-mini" onclick="syncManual()">↑ Sincronizar</button>
+  </div>
+
+  <!-- TABS -->
+  <div id="tabs">
+    <button class="tab-btn active" onclick="setTab('registro')">📝 Registro</button>
+    <button class="tab-btn" onclick="setTab('panel')">📊 Panel</button>
+    <button class="tab-btn" onclick="setTab('historial')">📁 Historial <span id="hist-badge" class="badge" style="display:none">0</span></button>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content"></div>
+</div>
+
+<!-- CONFIGURACIÓN DRIVE -->
+<div id="cfg-overlay">
+  <div id="cfg-modal">
+    <h2>⚙️ Configurar Google Drive</h2>
+    <p class="cfg-sub">Los registros se sincronizarán automáticamente con una planilla en <b>comite.docencia.osp@gmail.com</b></p>
+    <div class="cfg-steps">
+      <b>Configuración inicial (solo una vez):</b><br>
+      1. Abrí <b>script.google.com</b> con la cuenta del comité<br>
+      2. Creá un proyecto nuevo → pegá el código de <b>AppsScript_MesaInformes.js</b><br>
+      3. Implementar → Nueva implementación → Tipo: <b>Aplicación web</b><br>
+      4. Ejecutar como: <b>Yo</b> · Acceso: <b>Cualquier persona</b><br>
+      5. Copiá la URL y pegála abajo 👇
+    </div>
+    <label class="cfg-label">URL del Apps Script</label>
+    <textarea class="cfg-input" id="cfg-url" rows="3" placeholder="https://script.google.com/macros/s/..."></textarea>
+    <div id="cfg-result"></div>
+    <div class="cfg-row">
+      <button class="cfg-btn cfg-test" onclick="testConexion()">🔍 Probar</button>
+      <button class="cfg-btn cfg-save" onclick="guardarConfig()">💾 Guardar</button>
+    </div>
+    <div class="cfg-row">
+      <button class="cfg-btn cfg-clear" onclick="limpiarConfig()">🗑 Quitar conexión</button>
+      <button class="cfg-btn" style="background:var(--gray2);color:var(--gray6)" onclick="cerrarConfig()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ─── Constantes ────────────────────────────────────────────────────────────
+const MOTIVOS = ['Prestaciones médicas','Afiliación / Baja','Autorizaciones',
+  'Reintegros','Turnos médicos','Facturación / Coseguros','Medicación crónica','Otro'];
+const GRUPOS  = ['Menor 18','18–35','36–50','51–65','66–75','Mayor 75'];
+const SECTORES = ['Trabajo Social','Autorizaciones','Caja / Tesorería','Dirección','Auditoría','Otro'];
+const DOT_META = [
+  {badge:'🔴',lbl:'Sin personal',cls:'dt-0'},
+  {badge:'🟡',lbl:'1 personal',  cls:'dt-1'},
+  {badge:'🔵',lbl:'2 personales',cls:'dt-2'},
+  {badge:'🟢',lbl:'3 personales',cls:'dt-3'},
+];
+const PALETA = ['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981','#3b82f6','#ef4444','#14b8a6'];
+
+// ─── Estado ────────────────────────────────────────────────────────────────
+const today = new Date().toISOString().split('T')[0];
+
+let state = {
+  tab: 'registro',
+  dotacion: 1,
+  fechaRevision: today,
+  registros: [],
+  form: vacioForm(),
+};
+
+function vacioForm(){
+  return {
+    horaLlegadaStr: '', horaInicioStr: '', horaFinStr: '',
+    sexo: null, grupoEtario: null, motivo: null,
+    resultado: null, derivadoSector: null, observaciones: ''
+  };
+}
+
+// ─── Helpers tiempo ────────────────────────────────────────────────────────
+function parseHoraFecha(fechaStr, horaStr){
+  if(!horaStr || !fechaStr) return null;
+  const parts = horaStr.split(':').map(Number);
+  if(parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+  // Use noon offset to avoid timezone edge cases on the date itself
+  const d = new Date(fechaStr + 'T12:00:00');
+  d.setHours(parts[0], parts[1], 0, 0);
+  return d;
+}
+
+function fmtHora(d){
+  if(!d) return '—';
+  return d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function minfmt(ms){
+  if(!ms || ms <= 0) return '0.0';
+  return (ms/60000).toFixed(1);
+}
+
+function getFranja(d){
+  if(!d) return '—';
+  const h = d.getHours();
+  if(h < 7)  return 'Antes 07:00';
+  if(h >= 18) return 'Después 18:00';
+  return (h<10?'0':'')+h+':00–'+(h+1<10?'0':'')+(h+1)+':00';
+}
+
+function avg(arr){ return arr.length ? arr.reduce((s,x)=>s+x,0)/arr.length : 0; }
+function pct(a,b){ return b===0 ? 0 : (a/b*100).toFixed(1); }
+
+// ─── Fecha header ─────────────────────────────────────────────────────────
+function formatearFecha(fechaStr){
+  if(!fechaStr) return 'Revisión de cámara';
+  try {
+    const d = new Date(fechaStr + 'T12:00:00');
+    return d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  } catch(e){ return fechaStr; }
+}
+
+function updateFechaLbl(){
+  const lbl = document.getElementById('fecha-lbl');
+  if(lbl) lbl.textContent = formatearFecha(state.fechaRevision);
+}
+
+function initFecha(){
+  const inp = document.getElementById('fecha-grabacion');
+  if(inp) inp.value = state.fechaRevision;
+  updateFechaLbl();
+}
+
+// ─── Dotación ──────────────────────────────────────────────────────────────
+function cambiarDot(v){
+  state.dotacion = v;
+  document.querySelectorAll('.dot-btn').forEach(b=>{
+    b.classList.toggle('active', parseInt(b.dataset.d) === v);
+  });
+}
+
+// ─── Google Drive Sync ─────────────────────────────────────────────────────
+let syncTimer = null;
+
+function getScriptUrl(){ return localStorage.getItem('mesa_script_url') || ''; }
+
+function setSyncBar(estado, texto){
+  const bar = document.getElementById('sync-bar');
+  const lbl = document.getElementById('sync-lbl');
+  bar.className = estado;
+  lbl.textContent = texto;
+}
+
+async function enviarADrive(payload){
+  const url = getScriptUrl();
+  if(!url) return null;
+  try {
+    const resp = await fetch(url, {method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'text/plain'}});
+    return await resp.json();
+  } catch(e){ return {ok:false, error:e.message}; }
+}
+
+async function syncRegistroNuevo(registro){
+  const url = getScriptUrl();
+  if(!url) return;
+  setSyncBar('pending','Sincronizando...');
+  const res = await enviarADrive({tipo:'registro_nuevo', registro});
+  if(res && res.ok){
+    const ahora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    setSyncBar('ok','Drive ✓ — última sync: '+ahora+' ('+res.registros+' reg.)');
+  } else {
+    setSyncBar('err','Error al sincronizar — reintentando...');
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => syncManual(), 30000);
+  }
+}
+
+async function syncManual(){
+  const url = getScriptUrl();
+  if(!url){ showToast('⚙️ Primero configurá la URL del Drive'); return; }
+  if(!state.registros.length){ showToast('Sin registros para sincronizar'); return; }
+  setSyncBar('pending','Sincronizando todo...');
+  const res = await enviarADrive({tipo:'sync_completo', registros: state.registros});
+  if(res && res.ok){
+    const ahora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    setSyncBar('ok','Drive ✓ — sincronización completa: '+ahora);
+    showToast('✅ '+res.registros+' registros sincronizados en Drive');
+  } else {
+    setSyncBar('err','Sin conexión — los datos están guardados localmente');
+    showToast('⚠️ Sin conexión. Los datos están guardados.');
+  }
+}
+
+function inicializarSyncBar(){
+  const url = getScriptUrl();
+  if(url){ setSyncBar('ok','Drive configurado — listo'); }
+  else    { setSyncBar('off','Drive no configurado  ·  ⚙️ para configurar'); }
+}
+
+// ─── Settings modal ────────────────────────────────────────────────────────
+function abrirConfig(){
+  document.getElementById('cfg-url').value = getScriptUrl();
+  document.getElementById('cfg-result').style.display = 'none';
+  document.getElementById('cfg-overlay').classList.add('open');
+}
+function cerrarConfig(){ document.getElementById('cfg-overlay').classList.remove('open'); }
+
+function guardarConfig(){
+  const url = document.getElementById('cfg-url').value.trim();
+  if(!url){ mostrarCfgResult(false,'Pegá la URL del Apps Script'); return; }
+  localStorage.setItem('mesa_script_url', url);
+  inicializarSyncBar();
+  mostrarCfgResult(true,'URL guardada. Probá la conexión.');
+}
+
+async function testConexion(){
+  const url = document.getElementById('cfg-url').value.trim();
+  if(!url){ mostrarCfgResult(false,'Ingresá la URL primero'); return; }
+  mostrarCfgResult(null,'Probando conexión...');
+  try {
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if(json.ok){ mostrarCfgResult(true,'✅ Conexión exitosa — planilla: "'+json.planilla+'"'); }
+    else { mostrarCfgResult(false,'Error: '+json.error); }
+  } catch(e){ mostrarCfgResult(false,'No se pudo conectar: '+e.message); }
+}
+
+function limpiarConfig(){
+  localStorage.removeItem('mesa_script_url');
+  document.getElementById('cfg-url').value = '';
+  inicializarSyncBar();
+  cerrarConfig();
+}
+
+function mostrarCfgResult(ok, msg){
+  const el = document.getElementById('cfg-result');
+  el.style.display = 'block';
+  el.className = ok===true?'ok':ok===false?'err':'';
+  el.style.background = ok===null?'#f1f5f9':'';
+  el.style.color = ok===null?'#64748b':'';
+  el.textContent = msg;
+}
+
+// ─── Persistencia ──────────────────────────────────────────────────────────
+function guardarLS(){
+  const payload = state.registros.map(r => ({
+    ...r,
+    horaLlegada: r.horaLlegada ? r.horaLlegada.toISOString() : null,
+    horaInicio:  r.horaInicio  ? r.horaInicio.toISOString()  : null,
+    horaFin:     r.horaFin     ? r.horaFin.toISOString()     : null,
+  }));
+  try { localStorage.setItem('mesa_registros', JSON.stringify(payload)); } catch(e){}
+}
+
+function cargarLS(){
+  try {
+    const raw = JSON.parse(localStorage.getItem('mesa_registros') || '[]');
+    state.registros = raw.map(r => ({
+      ...r,
+      horaLlegada: r.horaLlegada ? new Date(r.horaLlegada) : null,
+      horaInicio:  r.horaInicio  ? new Date(r.horaInicio)  : null,
+      horaFin:     r.horaFin     ? new Date(r.horaFin)     : null,
+    }));
+  } catch(e){ state.registros = []; }
+}
+
+// ─── Acciones ──────────────────────────────────────────────────────────────
+function guardar(){
+  const f = state.form;
+
+  // Validaciones
+  if(!f.horaLlegadaStr){
+    showToast('⚠️ Ingresá la hora de llegada'); return;
+  }
+  if(!f.sexo || !f.grupoEtario || !f.resultado){
+    showToast('⚠️ Completar: Sexo, Edad y Resultado'); return;
+  }
+
+  const horaLlegada = parseHoraFecha(state.fechaRevision, f.horaLlegadaStr);
+  const horaInicio  = f.horaInicioStr ? parseHoraFecha(state.fechaRevision, f.horaInicioStr) : null;
+  const horaFin     = f.horaFinStr    ? parseHoraFecha(state.fechaRevision, f.horaFinStr)    : null;
+
+  if(!horaLlegada){ showToast('⚠️ Hora de llegada inválida'); return; }
+
+  // Calcular tiempos
+  // espMs: tiempo en cola antes de ser atendido
+  const espMs = horaInicio ? Math.max(0, horaInicio - horaLlegada) : 0;
+  // taskMs: duración de la atención (takt time)
+  let taskMs = 0;
+  if(horaInicio && horaFin)       taskMs = Math.max(0, horaFin - horaInicio);
+  else if(!horaInicio && horaFin) taskMs = Math.max(0, horaFin - horaLlegada);
+  // totalMs: tiempo total desde llegada hasta salida
+  const totalMs = horaFin ? Math.max(0, horaFin - horaLlegada) : espMs + taskMs;
+
+  const reg = {
+    id: Date.now(),
+    horaLlegada, horaInicio, horaFin,
+    franja: getFranja(horaLlegada),
+    dotacionAlLlegar: state.dotacion,
+    espMs, taskMs, totalMs,
+    sexo: f.sexo,
+    grupoEtario: f.grupoEtario,
+    motivo: f.motivo,
+    resultado: f.resultado,
+    derivadoSector: f.derivadoSector || null,
+    observaciones: f.observaciones || '',
+  };
+
+  state.registros.push(reg);
+  guardarLS();
+  syncRegistroNuevo(reg);
+
+  const n = state.registros.length;
+  state.form = vacioForm();
+  render();
+  showToast('✅ Registro #'+n+' guardado');
+
+  // Auto-focus primer campo de hora para entrada rápida del siguiente
+  setTimeout(()=>{ const el = document.getElementById('inp-llegada'); if(el) el.focus(); }, 150);
+}
+
+function eliminarUltimo(){
+  if(!state.registros.length) return;
+  state.registros.pop();
+  guardarLS();
+  render();
+  showToast('↩️ Último registro eliminado');
+}
+
+// ─── Tabs ──────────────────────────────────────────────────────────────────
+function setTab(t){
+  state.tab = t;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['registro','panel','historial'][i] === t);
+  });
+  render();
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1900);
+}
+
+// ─── Render Registro ───────────────────────────────────────────────────────
+function renderRegistro(){
+  const f = state.form;
+
+  // Calcular preview de tiempos en tiempo real
+  const hl = parseHoraFecha(state.fechaRevision, f.horaLlegadaStr);
+  const hi = parseHoraFecha(state.fechaRevision, f.horaInicioStr);
+  const hf = parseHoraFecha(state.fechaRevision, f.horaFinStr);
+
+  let previewHtml = '';
+  if(hl && hi && hf){
+    const espM  = ((hi-hl)/60000).toFixed(1);
+    const taktM = ((hf-hi)/60000).toFixed(1);
+    previewHtml = `<div class="tiempo-preview">
+      <div class="tprev-item"><div class="tprev-val" style="color:#1d4ed8">${espM}m</div><div class="tprev-lbl">⌛ Espera</div></div>
+      <div style="color:var(--gray3);font-size:20px;align-self:center">·</div>
+      <div class="tprev-item"><div class="tprev-val" style="color:#7e22ce">${taktM}m</div><div class="tprev-lbl">⏱ Takt time</div></div>
+      <div style="color:var(--gray3);font-size:20px;align-self:center">·</div>
+      <div class="tprev-item"><div class="tprev-val" style="color:#15803d">${((hf-hl)/60000).toFixed(1)}m</div><div class="tprev-lbl">🕐 Total</div></div>
+    </div>`;
+  } else if(hl && hf) {
+    const totM = ((hf-hl)/60000).toFixed(1);
+    previewHtml = `<div class="tiempo-preview">
+      <div class="tprev-item"><div class="tprev-val" style="color:#15803d">${totM}m</div><div class="tprev-lbl">⏱ Takt time estimado</div></div>
+    </div>`;
+  }
+
+  let html = '';
+
+  // ── Sección: Horarios ──────────────────────────────────────────
+  html += `<div class="card"><div class="card-body">
+    <div class="field-label">⏱ Horarios observados en la grabación</div>
+    <div class="time-group">
+      <div class="time-slot">
+        <label class="time-lbl">🚶 Llegada <span class="req">*</span></label>
+        <input type="time" id="inp-llegada" class="time-inp${f.horaLlegadaStr?' filled':''}"
+          value="${f.horaLlegadaStr}"
+          oninput="state.form.horaLlegadaStr=this.value;refreshPreview()">
+      </div>
+      <div class="time-slot">
+        <label class="time-lbl">▶ Inicio atención</label>
+        <input type="time" id="inp-inicio" class="time-inp${f.horaInicioStr?' filled':''}"
+          value="${f.horaInicioStr}"
+          oninput="state.form.horaInicioStr=this.value;refreshPreview()">
+      </div>
+      <div class="time-slot">
+        <label class="time-lbl">✅ Fin atención</label>
+        <input type="time" id="inp-fin" class="time-inp${f.horaFinStr?' filled':''}"
+          value="${f.horaFinStr}"
+          oninput="state.form.horaFinStr=this.value;refreshPreview()">
+      </div>
+    </div>
+    <div id="tiempo-preview-wrap">${previewHtml}</div>
+    <div style="font-size:11px;color:var(--gray4);margin-top:8px">
+      Copiá los horarios exactos que ves en la grabación. Inicio y Fin son opcionales para retiros sin atención.
+    </div>
+  </div></div>`;
+
+  // ── Sección: Clasificación ─────────────────────────────────────
+  html += `<div class="card"><div class="card-body">
+    <div class="field">
+      <label class="field-label">Sexo <span class="req">*</span></label>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${[['Masculino','♂️','sel-m'],['Femenino','♀️','sel-f'],['Otro','⚧','sel-o']].map(([v,e,cls])=>`
+          <button class="sex-btn${f.sexo===v?' '+cls:''}" data-field="sexo" data-value="${v}">
+            <span class="icon">${e}</span>${v}
+          </button>`).join('')}
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label class="field-label">Grupo Etario <span class="req">*</span></label>
+      <div class="choice-grid">
+        ${GRUPOS.map(g=>`<button class="choice-btn${f.grupoEtario===g?' sel':''}" data-field="grupoEtario" data-value="${g}">${g}</button>`).join('')}
+      </div>
+    </div>
+  </div></div>`;
+
+  // ── Sección: Motivo + Resultado ────────────────────────────────
+  html += `<div class="card"><div class="card-body">
+    <div class="field">
+      <label class="field-label">Motivo de Consulta</label>
+      <div class="choice-grid">
+        ${MOTIVOS.map(m=>`<button class="choice-btn${f.motivo===m?' sel':''}" data-field="motivo" data-value="${m}">${m}</button>`).join('')}
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Resultado <span class="req">*</span></label>
+      <div class="choice-grid cols3">
+        <button class="choice-btn${f.resultado==='Atendido'?' sel-grn':''}" style="font-size:11px"
+          data-field="resultado" data-value="Atendido"><span class="ch-icon">✅</span>Atendido</button>
+        <button class="choice-btn${f.resultado==='Se retiró sin atención'?' sel-red':''}" style="font-size:11px"
+          data-field="resultado" data-value="Se retiró sin atención"><span class="ch-icon">🚶</span>Se retiró</button>
+        <button class="choice-btn${f.resultado==='Derivado a otro sector'?' sel-amb':''}" style="font-size:11px"
+          data-field="resultado" data-value="Derivado a otro sector"><span class="ch-icon">➡️</span>Derivado</button>
+      </div>
+    </div>
+    ${f.resultado==='Derivado a otro sector' ? `
+    <div class="field">
+      <label class="field-label">¿A qué sector?</label>
+      <div class="choice-grid">
+        ${SECTORES.map(s=>`<button class="choice-btn${f.derivadoSector===s?' sel':''}" data-field="derivadoSector" data-value="${s}">${s}</button>`).join('')}
+      </div>
+    </div>` : ''}
+    <div class="field" style="margin-bottom:0">
+      <label class="field-label">Observaciones</label>
+      <textarea class="obs" rows="2" placeholder="Notas adicionales, dificultades observadas..."
+        oninput="state.form.observaciones=this.value">${f.observaciones}</textarea>
+    </div>
+  </div></div>`;
+
+  // ── Botón Guardar ──────────────────────────────────────────────
+  const okGuardar = f.horaLlegadaStr && f.sexo && f.grupoEtario && f.resultado;
+  html += `<div style="padding-bottom:16px">
+    <button class="btn-save" onclick="guardar()" ${okGuardar?'':'disabled'}>
+      ${okGuardar ? '✅ Registrar Afiliado' : 'Completar: Llegada · Sexo · Edad · Resultado'}
+    </button>
+    ${state.registros.length ? `
+    <button onclick="eliminarUltimo()" style="width:100%;margin-top:8px;padding:10px;background:none;border:1.5px solid var(--gray3);border-radius:12px;font-size:12px;font-weight:700;color:var(--gray5);cursor:pointer">
+      ↩️ Deshacer último registro
+    </button>` : ''}
+    <p style="text-align:center;font-size:11px;color:#94a3b8;margin-top:8px">* campos obligatorios</p>
+  </div>`;
+
+  // ── Últimos registros ──────────────────────────────────────────
+  if(state.registros.length){
+    const ult = [...state.registros].slice(-4).reverse();
+    html += `<div class="card"><div class="card-body">
+      <div class="chart-title" style="margin-bottom:10px">🕐 Últimos ${ult.length} registro${ult.length>1?'s':''}</div>`;
+    ult.forEach((r,i)=>{
+      const dm = DOT_META[r.dotacionAlLlegar||0];
+      const resCls = r.resultado==='Atendido'?'res-att':r.resultado==='Se retiró sin atención'?'res-ret':'res-der';
+      const resLbl = r.resultado==='Atendido'?'✅ Atend.':r.resultado==='Se retiró sin atención'?'🚶 Retiró':'➡️ Deriv.';
+      html += `<div class="quick-rec">
+        <span style="font-family:monospace;font-size:12px;color:var(--gray6);min-width:42px">${fmtHora(r.horaLlegada)}</span>
+        <span class="dot-tag ${dm.cls}" style="font-size:9px;padding:1px 6px">${dm.badge}</span>
+        <span style="font-size:12px;color:var(--gray6);flex:1">${r.sexo?r.sexo[0]:'?'} · ${r.grupoEtario||'?'}</span>
+        <span class="${resCls}">${resLbl}</span>
+        <span style="font-size:11px;font-weight:700;color:#7e22ce;min-width:32px;text-align:right">${minfmt(r.taskMs)}m</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  return html;
+}
+
+// ─── Render Panel ──────────────────────────────────────────────────────────
+function renderPanel(){
+  const regs = state.registros;
+  const n = regs.length;
+  if(!n){
+    return `<div class="empty"><span class="icon">📊</span><p>Sin datos aún</p><small>Registrá afiliados en la pestaña "Registro"</small></div>`;
+  }
+
+  const atend = regs.filter(r=>r.resultado==='Atendido');
+  const retir = regs.filter(r=>r.resultado==='Se retiró sin atención');
+  const avgTask = avg(atend.map(r=>r.taskMs/60000)).toFixed(1);
+  const avgEsp  = avg(regs.filter(r=>r.espMs>0).map(r=>r.espMs/60000)).toFixed(1);
+  const tasaAb  = pct(retir.length, n);
+
+  // Por franja horaria
+  const fMap = {};
+  regs.forEach(r=>{ if(r.franja) fMap[r.franja]=(fMap[r.franja]||0)+1; });
+  const franjas = Object.entries(fMap).sort((a,b)=>a[0].localeCompare(b[0]));
+  const maxF = Math.max(...franjas.map(x=>x[1]),1);
+
+  // Espera promedio por dotación
+  const dotEsp={}, dotCnt={};
+  regs.forEach(r=>{
+    const k=r.dotacionAlLlegar;
+    dotEsp[k]=(dotEsp[k]||0)+r.espMs/60000;
+    dotCnt[k]=(dotCnt[k]||0)+1;
+  });
+  const dotRows = [0,1,2,3].filter(d=>dotCnt[d]).map(d=>({
+    d, lbl:DOT_META[d].badge+' '+DOT_META[d].lbl,
+    avgE: (dotEsp[d]/dotCnt[d]).toFixed(1), n:dotCnt[d]
+  }));
+  const maxDE = Math.max(...dotRows.map(x=>parseFloat(x.avgE)),1);
+
+  // Abandono por dotación
+  const dotAb={};
+  regs.forEach(r=>{
+    const k=r.dotacionAlLlegar;
+    if(!dotAb[k]) dotAb[k]={tot:0,ab:0};
+    dotAb[k].tot++;
+    if(r.resultado==='Se retiró sin atención') dotAb[k].ab++;
+  });
+  const abRows = [0,1,2,3].filter(d=>dotAb[d]).map(d=>({
+    d, lbl:DOT_META[d].badge+' '+DOT_META[d].lbl,
+    pct: pct(dotAb[d].ab, dotAb[d].tot)
+  }));
+
+  // Motivos
+  const mMap={};
+  regs.forEach(r=>{ if(r.motivo) mMap[r.motivo]=(mMap[r.motivo]||0)+1; });
+  const motivos = Object.entries(mMap).sort((a,b)=>b[1]-a[1]);
+  const maxM = Math.max(...motivos.map(x=>x[1]),1);
+
+  // Takt time por motivo
+  const tmMap={}, tmCnt={};
+  atend.forEach(r=>{ if(r.motivo){ tmMap[r.motivo]=(tmMap[r.motivo]||0)+r.taskMs/60000; tmCnt[r.motivo]=(tmCnt[r.motivo]||0)+1; }});
+  const taskMot = Object.entries(tmMap).map(([k,v])=>([k,(v/tmCnt[k]).toFixed(1)])).sort((a,b)=>b[1]-a[1]);
+  const maxTM = Math.max(...taskMot.map(x=>parseFloat(x[1])),1);
+
+  // Grupos etarios
+  const eMap={}; GRUPOS.forEach(g=>eMap[g]=0);
+  regs.forEach(r=>{ if(r.grupoEtario) eMap[r.grupoEtario]++; });
+  const edades = GRUPOS.map(g=>([g,eMap[g]]));
+  const maxE = Math.max(...edades.map(x=>x[1]),1);
+
+  // Franja pico
+  const peak = [...franjas].sort((a,b)=>b[1]-a[1])[0] || ['—',0];
+
+  let html = '';
+
+  // KPIs principales
+  html += `<div class="kpi-grid">
+    <div class="kpi kpi-ind"><div class="kpi-val">${n}</div><div class="kpi-lbl">Total</div></div>
+    <div class="kpi kpi-grn"><div class="kpi-val">${atend.length}</div><div class="kpi-lbl">Atendidos<br>${pct(atend.length,n)}%</div></div>
+    <div class="kpi kpi-red"><div class="kpi-val">${retir.length}</div><div class="kpi-lbl">Abandono<br>${tasaAb}%</div></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi kpi-pur"><div class="kpi-val" style="font-size:20px">${avgTask}m</div><div class="kpi-lbl">Takt time<br>prom.</div></div>
+    <div class="kpi kpi-blu"><div class="kpi-val" style="font-size:20px">${avgEsp}m</div><div class="kpi-lbl">Espera<br>prom.</div></div>
+    <div class="kpi kpi-amb"><div class="kpi-val" style="font-size:13px;line-height:1.2">${peak[0]}</div><div class="kpi-lbl">Franja pico<br>${peak[1]} afil.</div></div>
+  </div>`;
+
+  // Espera por dotación
+  if(dotRows.length){
+    html += `<div class="card"><div class="card-body">
+      <div class="chart-title">👥 Espera promedio según dotación</div>
+      <div class="chart-sub">Relación entre personal disponible y tiempo de espera</div>`;
+    dotRows.forEach(row=>{
+      const w = Math.max(parseFloat(row.avgE)/maxDE*100,3).toFixed(0);
+      html += `<div class="bar-row">
+        <div class="bar-name wide" style="font-size:10px">${row.lbl}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#6366f1">
+          <span>${row.avgE}m</span></div></div>
+        <div class="bar-val">${row.n} reg</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Abandono por dotación
+  if(abRows.length){
+    html += `<div class="card"><div class="card-body">
+      <div class="chart-title">🚶 Tasa de abandono según dotación (%)</div>
+      <div class="chart-sub">A menor personal, mayor tasa de retiro sin atención</div>`;
+    abRows.forEach(row=>{
+      const w = Math.max(parseFloat(row.pct),3).toFixed(0);
+      html += `<div class="bar-row">
+        <div class="bar-name wide" style="font-size:10px">${row.lbl}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#ef4444">
+          <span>${row.pct}%</span></div></div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Franja horaria
+  if(franjas.length){
+    html += `<div class="card"><div class="card-body">
+      <div class="chart-title">🕐 Afluencia por Franja Horaria</div>
+      <div class="chart-sub">Cantidad de afiliados por hora</div>`;
+    franjas.forEach(([name,val])=>{
+      const w = Math.max(val/maxF*100,3).toFixed(0);
+      html += `<div class="bar-row">
+        <div class="bar-name" style="font-size:9px;width:80px">${name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#6366f1"><span>${val}</span></div></div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Motivos
+  if(motivos.length){
+    html += `<div class="card"><div class="card-body">
+      <div class="chart-title">📋 Motivos de Consulta</div>
+      <div class="chart-sub"></div>`;
+    motivos.forEach(([name,val],i)=>{
+      const w = Math.max(val/maxM*100,3).toFixed(0);
+      html += `<div class="bar-row">
+        <div class="bar-name wide" style="font-size:9px;width:110px">${name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${PALETA[i%PALETA.length]}"><span>${val}</span></div></div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Takt time por motivo
+  if(taskMot.length){
+    html += `<div class="card"><div class="card-body">
+      <div class="chart-title">⏱ Takt Time por Motivo (min promedio)</div>
+      <div class="chart-sub">Cuánto demora resolver cada tipo de consulta</div>`;
+    taskMot.forEach(([name,val],i)=>{
+      const w = Math.max(parseFloat(val)/maxTM*100,3).toFixed(0);
+      html += `<div class="bar-row">
+        <div class="bar-name wide" style="font-size:9px;width:110px">${name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${PALETA[i%PALETA.length]}"><span>${val}m</span></div></div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Grupos etarios
+  html += `<div class="card"><div class="card-body">
+    <div class="chart-title">🎂 Grupos Etarios</div>
+    <div class="chart-sub"></div>`;
+  edades.forEach(([name,val])=>{
+    const w = Math.max(val/maxE*100, val>0?3:0).toFixed(0);
+    html += `<div class="bar-row">
+      <div class="bar-name" style="width:60px">${name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#10b981">${val>0?`<span>${val}</span>`:''}</div></div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // Alertas automáticas
+  if(parseFloat(tasaAb) > 15){
+    html += `<div class="alert alert-red">
+      <span class="icon">🚨</span>
+      <div><strong>Tasa de abandono: ${tasaAb}%</strong>Supera el umbral del 15%.</div>
+    </div>`;
+  }
+  if(parseFloat(avgEsp) > 15){
+    html += `<div class="alert alert-amb">
+      <span class="icon">⏰</span>
+      <div><strong>Espera promedio: ${avgEsp} min</strong>Supera los 15 minutos recomendados.</div>
+    </div>`;
+  }
+
+  return html;
+}
+
+// ─── Render Historial ──────────────────────────────────────────────────────
+function renderHistorial(){
+  const regs = state.registros;
+  let html = '';
+  if(regs.length){
+    html += `<button class="export-btn" onclick="exportarCSV()">⬇️ Exportar CSV — ${regs.length} registros</button>`;
+  }
+  if(!regs.length){
+    return html + `<div class="empty"><span class="icon">📁</span><p>Sin registros aún</p><small>Ingresá datos en la pestaña "Registro"</small></div>`;
+  }
+  html += `<div class="card"><div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>#</th><th>Fecha</th><th>Llegada</th><th>Inicio</th><th>Fin</th>
+      <th>Dot.</th><th>Espera</th><th>Takt</th>
+      <th>Sexo</th><th>Edad</th><th>Motivo</th><th>Resultado</th>
+    </tr></thead><tbody>`;
+  [...regs].reverse().forEach((r,i)=>{
+    const dm = DOT_META[r.dotacionAlLlegar||0];
+    const resCls = r.resultado==='Atendido'?'res-att':r.resultado==='Se retiró sin atención'?'res-ret':'res-der';
+    const resLbl = r.resultado==='Atendido'?'✅':r.resultado==='Se retiró sin atención'?'🚶':'➡️';
+    const fecha = r.horaLlegada ? r.horaLlegada.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) : '—';
+    html += `<tr>
+      <td>${regs.length-i}</td>
+      <td style="white-space:nowrap">${fecha}</td>
+      <td style="font-family:monospace">${fmtHora(r.horaLlegada)}</td>
+      <td style="font-family:monospace">${fmtHora(r.horaInicio)}</td>
+      <td style="font-family:monospace">${fmtHora(r.horaFin)}</td>
+      <td><span class="dot-tag ${dm.cls}" style="font-size:9px">${dm.badge}</span></td>
+      <td style="font-weight:700;color:#1d4ed8">${minfmt(r.espMs)}m</td>
+      <td style="font-weight:700;color:#7e22ce">${minfmt(r.taskMs)}m</td>
+      <td>${r.sexo?r.sexo[0]:'—'}</td>
+      <td style="white-space:nowrap">${r.grupoEtario||'—'}</td>
+      <td style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.motivo||'—'}</td>
+      <td><span class="${resCls}">${resLbl}</span></td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  return html;
+}
+
+// ─── Exportar CSV ──────────────────────────────────────────────────────────
+function exportarCSV(){
+  const cab = ['N°','Fecha','Llegada','Inicio_Atencion','Fin_Atencion','Franja',
+    'Dotacion','Espera_min','TaktTime_min','Total_min',
+    'Sexo','GrupoEtario','Motivo','Resultado','Derivado_Sector','Observaciones'];
+  const fils = state.registros.map((r,i)=>[
+    i+1,
+    r.horaLlegada ? r.horaLlegada.toLocaleDateString('es-AR') : '',
+    fmtHora(r.horaLlegada), fmtHora(r.horaInicio), fmtHora(r.horaFin),
+    r.franja||'', r.dotacionAlLlegar||0,
+    minfmt(r.espMs), minfmt(r.taskMs), minfmt(r.totalMs),
+    r.sexo||'', r.grupoEtario||'', r.motivo||'',
+    r.resultado||'', r.derivadoSector||'',
+    '"'+(r.observaciones||'').replace(/"/g,"''")+'"'
+  ]);
+  const csv = '\uFEFF' + [cab,...fils].map(f=>f.join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'mesa_obs_'+new Date().toLocaleDateString('es-AR').replace(/\//g,'-')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Render principal ──────────────────────────────────────────────────────
+function render(){
+  const content = document.getElementById('content');
+  const t = state.tab;
+  content.innerHTML = t==='registro' ? renderRegistro() : t==='panel' ? renderPanel() : renderHistorial();
+
+  // Actualizar badge historial
+  const badge = document.getElementById('hist-badge');
+  if(badge){
+    badge.textContent = state.registros.length;
+    badge.style.display = state.registros.length ? 'inline' : 'none';
+  }
+  // Actualizar total
+  const total = document.getElementById('total-badge');
+  if(total) total.textContent = state.registros.length;
+}
+
+// ─── Actualización dinámica del preview de tiempos ────────────────────────
+function refreshPreview(){
+  const f = state.form;
+  const hl = parseHoraFecha(state.fechaRevision, f.horaLlegadaStr);
+  const hi = parseHoraFecha(state.fechaRevision, f.horaInicioStr);
+  const hf = parseHoraFecha(state.fechaRevision, f.horaFinStr);
+
+  const wrap = document.getElementById('tiempo-preview-wrap');
+  if(!wrap) return;
+
+  let previewHtml = '';
+  if(hl && hi && hf){
+    const espM  = ((hi-hl)/60000).toFixed(1);
+    const taktM = ((hf-hi)/60000).toFixed(1);
+    previewHtml = `<div class="tiempo-preview">
+      <div class="tprev-item"><div class="tprev-val" style="color:#1d4ed8">${espM}m</div><div class="tprev-lbl">⌛ Espera</div></div>
+      <div style="color:var(--gray3);font-size:20px;align-self:center">·</div>
+      <div class="tprev-item"><div class="tprev-val" style="color:#7e22ce">${taktM}m</div><div class="tprev-lbl">⏱ Takt time</div></div>
+      <div style="color:var(--gray3);font-size:20px;align-self:center">·</div>
+      <div class="tprev-item"><div class="tprev-val" style="color:#15803d">${((hf-hl)/60000).toFixed(1)}m</div><div class="tprev-lbl">🕐 Total</div></div>
+    </div>`;
+  } else if(hl && hf) {
+    const totM = ((hf-hl)/60000).toFixed(1);
+    previewHtml = `<div class="tiempo-preview">
+      <div class="tprev-item"><div class="tprev-val" style="color:#15803d">${totM}m</div><div class="tprev-lbl">⏱ Takt time estimado</div></div>
+    </div>`;
+  }
+  wrap.innerHTML = previewHtml;
+
+  // Actualizar clases filled en los inputs
+  ['inp-llegada','inp-inicio','inp-fin'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('filled', el.value !== '');
+  });
+}
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+cargarLS();
+initFecha();
+inicializarSyncBar();
+render();
+
+// Event delegation — formulario registro (botones de selección sin onclick)
+document.getElementById('content').addEventListener('click', function(e){
+  if(state.tab !== 'registro') return;
+  const btn = e.target.closest('[data-field]');
+  if(!btn) return;
+  state.form[btn.dataset.field] = btn.dataset.value;
+  render();
+  // Restaurar scroll position no es necesario — el usuario acaba de hacer click
+});
+
+// Dot buttons style
+const dotStyle = document.createElement('style');
+dotStyle.textContent = `.dot-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;display:inline-block;color:#fff}
+.dt-0{background:#ef4444}.dt-1{background:#f59e0b}.dt-2{background:#3b82f6}.dt-3{background:#22c55e}`;
+document.head.appendChild(dotStyle);
+</script>
+</body>
+</html>
